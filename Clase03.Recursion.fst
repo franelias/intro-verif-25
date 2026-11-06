@@ -7,8 +7,8 @@ let rec add (m n : nat) : Tot nat (decreases n) =
   else add (m+1) (n-1)
 
 (* Demuestre la terminación de esta función *)
-let rec countdown (x:int) : Tot nat =
-  admit(); // borrar
+let rec countdown (x:int) : Tot nat (decreases x+5) =
+  // admit(); // borrar
   if x <= -5 then 0
   else (
     countdown (x-1)
