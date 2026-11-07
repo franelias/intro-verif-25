@@ -79,7 +79,13 @@ type runsto : (p:stmt) -> (s0:state) -> (s1:state) -> Type0 =
 //   runsto (While c b) s s'
 let r_while (#c:expr) (#b:stmt) (#s #s' : state) (pf : runsto (IfZ c (Seq b (While c b)) Skip) s s')
   : runsto (While c b) s s'
-= admit()
+= match pf with
+  | R_IfZ_True pf_seq  _ -> (match pf_seq with
+                              | R_Seq pf_b pf_while -> R_While_True pf_b () pf_while)
+  | R_IfZ_False pf_skip _ -> (
+    match pf_skip with
+      | R_Skip _ -> R_While_False ()
+  )
 
 type cond = state -> bool
 
@@ -96,10 +102,45 @@ let rec hoare_ok (p:stmt) (pre:cond) (post:cond) (pf : hoare pre p post)
                  (s0 s1 : state) (e_pf : runsto p s0 s1)
   : Lemma (requires pre s0)
           (ensures  post s1)
-= admit()
+= match pf with
+  | H_Skip _ -> (match e_pf with
+                  | R_Skip _ -> ())
+  | H_Seq pf_p pf_q -> (match e_pf with
+                          | R_Seq pf_p pf_q -> admit())
+
+  // | R_Skip : s:state -> runsto Skip s s
+  // | R_Assign : s:state -> #x:var -> #e:expr -> runsto (Assign x e) s (override s x (eval_expr s e))
+
+  // | R_Seq :
+  //   #p:stmt -> #q:stmt ->
+  //   #s:state -> #t:state -> #u:state ->
+  //   runsto p s t -> runsto q t u -> runsto (Seq p q) s u
+
+  // | R_IfZ_True :
+  //   #c:expr -> #t:stmt -> #e:stmt ->
+  //   #s:state -> #s':state -> runsto t s s' ->
+  //   squash (eval_expr s c == 0) ->
+  //   runsto (IfZ c t e) s s'
+
+  // | R_IfZ_False :
+  //   #c:expr -> #t:stmt -> #e:stmt ->
+  //   #s:state -> #s':state -> runsto e s s' ->
+  //   squash (eval_expr s c <> 0) ->
+  //   runsto (IfZ c t e) s s'
+
+  // | R_While_True :
+  //   #c:expr -> #b:stmt -> #s:state -> #s':state -> #s'':state ->
+  //   runsto b s s' ->
+  //   squash (eval_expr s c = 0) ->
+  //   runsto (While c b) s' s'' ->
+  //   runsto (While c b) s s''
+
+  // | R_While_False :
+  //   #c:expr -> #b:stmt -> #s:state ->
+  //   squash (eval_expr s c <> 0) ->
+  //   runsto (While c b) s s
 
 let st0 : state = fun _ -> 0
 
 let test1 : hoare (fun _ -> true) (Assign "x" (Const 1)) (fun s -> s "x" = 1) =
   admit()
-

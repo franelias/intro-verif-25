@@ -46,20 +46,31 @@ let rec height (t: bst) : nat =
   | L -> 0
   | N (l, _, r) -> 1 + max (height l) (height r)
 
-let insert_size (x:int) (t:bst) : Lemma (size (insert x t) == 1 + size t) =
-  admit()
+let rec insert_size (x:int) (t:bst) : Lemma (size (insert x t) == 1 + size t) =
+  match t with
+  | L -> ()
+  | N (l, n, r) -> if x <= n then insert_size x l else insert_size x r
 
-let insert_height (x:int) (t:bst)
+let rec insert_height (x:int) (t:bst)
 : Lemma (height (insert x t) <= 1 + height t)
-=
-  admit()
+= match t with
+  | L -> ()
+  | N (l, n, r) -> if x <= n then insert_height x l else insert_height x r
 
-let insert_mem (x:int) (t:bst) : Lemma (member x (insert x t)) =
-  admit()
+let rec insert_mem (x:int) (t:bst) : Lemma (member x (insert x t)) =
+  match t with
+  | L -> ()
+  | N (l, n, r) -> if x <= n then insert_mem x l else insert_mem x r
 
 (* ¿Puede demostrar también que:
      height t <= height (insert x t)
    ? ¿Cuál es la forma "más fácil" de hacerlo? *)
+
+let rec insert_height' (x:int) (t:bst)
+: Lemma (height (insert x t) <= 1 + height t /\ height t <= height (insert x t))
+= match t with
+  | L -> ()
+  | N (l, n, r) -> if x <= n then insert_height' x l else insert_height' x r
 
 let rec extract_min (t: bst) : option (int & bst) =
   match t with
