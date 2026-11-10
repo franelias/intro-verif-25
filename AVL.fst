@@ -8,11 +8,13 @@ type avl0 =
   | L
   | N of avl0 & int & nat & avl0
 
+// Todos los valores de t son menores a x
 let rec all_lt (x: int) (t: avl0) : bool =
   match t with
   | L -> true
   | N (l, y, _, r) -> all_lt x l && y < x && all_lt x r
 
+// Todos los valores de t son mayores a x
 let rec all_gt (x: int) (t: avl0) : bool =
   match t with
   | L -> true
@@ -31,10 +33,10 @@ let rec height (t: avl0) : nat =
   | N (l, x, _, r) -> 1 + max (height l) (height r)
 
 // Altura calculada por el dato del nodo.
-let hgt (t: avl0) : nat =
-  match t with
-  | L -> 0
-  | N (l, x, h, r) -> h
+let hgt (t: avl0) : nat = height t
+  // match t with
+  // | L -> 0
+  // | N (l, x, h, r) -> h
 
 // Balance factor: la diferencia entre la altura del subárbol 
 // de la derecha y el de la izquierda
@@ -53,14 +55,9 @@ let rec heights_ok (t:avl0) : bool =
   | L -> true
   | N (l, _, h, r) -> heights_ok l && heights_ok r && h = 1 + max (hgt l) (hgt r)
 
-let rec hgt_height (t:avl0) : Lemma (requires heights_ok t) (ensures hgt t == height t) =
-    match t with
-    | L -> ()
-    | N (l, _, h, r) -> hgt_height l; hgt_height r
-
 let is_avl (t:avl0) : bool = is_bst t && is_balanced t && heights_ok t
 
-let create_node(l:avl0) (x:int) (r:avl0) = N(l, x, 1 + max(hgt l) (hgt r), r)
+let create_node (l:avl0) (x:int) (r:avl0) = N(l, x, 1 + max (hgt l) (hgt r), r)
 
 let rotate_right (t:avl0) : avl0 =
   match t with
@@ -68,6 +65,12 @@ let rotate_right (t:avl0) : avl0 =
     | N ( N (l, y, _, r'), x, _, r) -> create_node l y (create_node r' x r)
     | _ -> t
 
+
+//    x                  y
+//   / \                / \
+//  l   y      ==>     x   r
+//     / \            / \
+//    l'  r          l   l'
 let rotate_left (t:avl0) : avl0 =
   match t with
     | L -> L
@@ -89,26 +92,3 @@ let rec insert0 (x: int) (t: avl0) : avl0 =
     if x = y then t
     else if x < y then balance (insert0 x l) y r
                   else balance l y (insert0 x r)
-
-let insert0_bst (x:int) (t:avl0) : Lemma (requires is_bst t) (ensures is_bst (insert0 x t)) =
-  admit()
-
-// let insert0_diff2 (x:int) (t:avl0)
-
-let rec insert0_balanced (x:int) (t:avl0) : Lemma (requires is_balanced t) (ensures is_balanced (insert0 x t)) (decreases t) =
-  match t with
-  | L -> ()
-  | N (l, y, h, r) -> if x = y then () else if x < y then (hgt_height t; insert0_balanced x l)
-                                                     else admit()
-
-let insert0_avl (x:int) (t:avl0) : Lemma (requires is_avl t) (ensures is_avl (insert0 x t)) =
-  insert0_balanced x t; insert0_bst x t
-
-type avl = t:avl0{is_avl t}
-
-let insert (x:int) (t:avl) : avl =
-  insert0_avl x t;
-  insert0 x t
-
-let _ = assert (insert 3 L = N (L, 3, 1, L))
-let _ = assert (insert 4 (N (L, 3, 1, L)) = N (L, 3, 2, N (L, 4, 1, L)))
