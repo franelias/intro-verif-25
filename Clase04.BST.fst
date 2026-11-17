@@ -95,17 +95,44 @@ let rec delete (x: int) (t: bst) : bst =
     else if x > y then N (l, y, delete x r)
     else delete_root t
 
+let rec delete_root_L (t:bst) : Lemma (requires extract_min t == None) (ensures t == L) =
+  match t with
+  | L -> ()
+  | N (l, _, _) -> delete_root_L l
+
+let rec extract_min_size (t:bst)
+  : Lemma (requires Some? (extract_min t))
+          (ensures (let Some (_, t') = extract_min t in size t' == size t - 1)) =
+  match t with
+  | N (L, _, _) -> ()
+  | N (l, _, _) -> extract_min_size l
+
+let delete_root_size (t:bst) : Lemma (requires N? t) (ensures size (delete_root t) == size t - 1) =
+  let N (l, _, r) = t in
+  match extract_min r with
+  | None -> delete_root_L r
+  | Some (x, r') -> extract_min_size r
+
 (* Un poco más difícil. Require un lema auxiliar sobre extract_min:
 declárelo y demuéstrelo. Si le parece conveniente, puede modificar
 las definiciones de delete, delete_root y extract_min. *)
-let delete_size (x:int) (t:bst) : Lemma (delete x t == t \/ size (delete x t) == size t - 1) =
-  admit()
+let rec delete_size (x:int) (t:bst) : Lemma (delete x t == t \/ size (delete x t) == size t - 1) =
+  match t with
+  | L -> ()
+  | N (l, y, r) ->
+    if x < y then delete_size x l
+    else if x > y then delete_size x r
+    else delete_root_size t
 
 (* Versión más fuerte del lema anterior. *)
-let delete_size_mem (x:int) (t:bst)
+let rec delete_size_mem (x:int) (t:bst)
 : Lemma (requires member x t)
         (ensures size (delete x t) == size t - 1)
-= admit()
+= match t with
+  | N (l, y, r) ->
+    if x < y then delete_size_mem x l
+    else if x > y then delete_size_mem x r
+    else delete_root_size t
 
 let to_list_length (t:bst) : Lemma (length (to_list t) == size t) =
   admit()
