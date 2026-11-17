@@ -134,10 +134,15 @@ let rec delete_size_mem (x:int) (t:bst)
     else if x > y then delete_size_mem x r
     else delete_root_size t
 
-let to_list_length (t:bst) : Lemma (length (to_list t) == size t) =
-  admit()
+let length_lists (l1 l2 l3 : list int) : Lemma (length (l1 @ l2 @ l3) = length l1 + length l2 + length l3) = ()
+
+let rec to_list_length (t:bst) : Lemma (length (to_list t) == size t) =
+  match t with
+  | L -> ()
+  | N (l, y, r) -> length_lists (to_list l) [y] (to_list r); to_list_length l; to_list_length r
 
 (* Contestar en texto (sin intentar formalizar):
-    ¿Es cierto que `member x (insert y (insert x t))`? ¿Cómo se puede probar?
-    ¿Es cierto que `delete x (insert x t) == t`?
+    ¿Es cierto que `member x (insert y (insert x t))`? ¿Cómo se puede probar? Si
+    ¿Es cierto que `delete x (insert x t) == t`? No, el árbol admite duplicados
 *)
+
