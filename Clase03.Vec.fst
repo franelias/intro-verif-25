@@ -29,10 +29,10 @@ let rec vupd (#a:Type) (#n:pos) (xs : vec a n) (i : nat{i < n}) (x : a) : vec a 
 usar las definiciones anteriores. *)
 
 let mat (a:Type) (m n : nat) : Type =
-  admit()
+  vec (vec a n) m
 
 let matidx (#a:Type) (#m #n : nat) (ma : mat a m n) (i : nat{i < m}) (j : nat{j < n}) : a =
-  admit()
+  vidx (vidx ma i) j
 
 let matupd (#a:Type) (#m #n : nat) (ma : mat a m n) (i : nat{i < m}) (j : nat{j < n}) (x : a) : mat a m n =
-  admit()
+  vupd ma i (vupd (vidx ma i) j x)

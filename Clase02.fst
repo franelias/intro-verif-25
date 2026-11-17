@@ -254,7 +254,11 @@ let lte_implica_edn (lte : tercero_excluido) (#a:Type) : eliminacion_doble_neg =
 
 (* Ejercicio. ¡Difícil! *)
 let edn_implica_lte (edn : eliminacion_doble_neg) (#a:Type) : oo a (no a) =
-  admit()
+  let aux : no (no (oo a (no a))) = 
+    fun (x : (no (oo a (no a)))) ->
+      let x' : yy (no a) (no (no a)) = demorgan2_vuelta x in
+      (snd x') (fst x')
+  in edn aux
 
 (* Ejercicio: ¿la ley de Peirce es intuicionista o clásica?
 Demuestrelá sin axiomas para demostrar que es intuicionista,
@@ -269,4 +273,6 @@ let lte_implica_peirce (lte : tercero_excluido) : peirce =
                     | Inr na -> aba (fun a -> ex_falso (na a))
 
 let peirce_implica_lte (pp : peirce) : tercero_excluido =
-  fun a -> admit()
+  fun a ->
+    pp #(oo a (no a)) #falso
+      (fun (k : no (oo a (no a))) -> Inr (fun (x:a) -> k (Inl x)))
