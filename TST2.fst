@@ -41,9 +41,15 @@ let rec lookup_ok (t:tst) (s:string) : Lemma (lookup t s == in_tst t s) =
     match t, String.list_of_string s with
   | L, _ -> ()
   | _, [] -> ()
-  | N (l, m, r, c, w), x::xs -> let x' = FStar.Char.int_of_char x
-                                in let c' = FStar.Char.int_of_char c in
-                                if x' < c' then (lookup_ok l s; member_not_in_tree_gt c' r s)
-                                           else if x' > c' then (lookup_ok r s; member_not_in_tree_lt c' l s)
-                                                           else if x' = c' && xs = [] then (member_not_in_tree_lt c' l s; member_not_in_tree_gt c' r s)
-                                                                                      else (member_not_in_tree_lt c' l s; member_not_in_tree_gt c' r s; lookup_ok m (String.string_of_list xs))
+  | N (l, m, r, c, w), x::xs -> 
+    let x' = FStar.Char.int_of_char x in
+    let c' = FStar.Char.int_of_char c in
+    if x' < c' then (lookup_ok l s; member_not_in_tree_gt c' r s)
+    else if x' > c' then (lookup_ok r s; member_not_in_tree_lt c' l s)
+    else if x' = c' && xs = [] then (member_not_in_tree_lt c' l s; member_not_in_tree_gt c' r s)
+    else (
+      member_not_in_tree_lt c' l s;
+      member_not_in_tree_gt c' r s;
+      String.list_of_string_of_list xs;
+      lookup_ok m (String.string_of_list xs)
+    )
